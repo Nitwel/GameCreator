@@ -1,5 +1,8 @@
 package de.nitwel.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import GLOOP.GLKamera;
 import GLOOP.GLQuader;
 import GLOOP.GLTastatur;
@@ -11,22 +14,27 @@ public class Player
 	//Werte der Klasse
     private GLQuader koerper;
     private double x,y,z;
-    private int size;
-    private double speed = 0.2;
-    private double kameraResetSpeed = 0;
-    private double jumpStrength = 0.5;
-    private double gravity = 0.001;
-    private double gravitation;
+    private int height, width, depth;
+    private double speed = 1;			//geschwindigkeit des Objektes
+    private double jumpStrength = 2;	//sprungstärke des Objektes
+    private double gravity = 0.015;		//die Gravitation der Welt
+    private double gravitation;			//die gespeicherte und aktuelle Gravitation
     private GLKamera kamera;
+    private int kameraOffSet;
+    private double kameraResetSpeed = 0;
     private int minKameraRange = 100;
     private int maxKameraRange = 500;
     private int viewDirection = 0;
+    private int gameSpeed = 5;
     
     //erstellen eines Objektes
-    public Player(GLVektor vektor,int size){
-        this.x = vektor.gibX(); this.y = vektor.gibY(); this.z = vektor.gibZ(); this.size = size;
-        this.koerper = new GLQuader(this.x,this.y,this.z,this.size,this.size,this.size);
+    public Player(GLVektor vektor,int width,int height,int depth){
+        this.x = vektor.gibX(); this.y = vektor.gibY(); this.z = vektor.gibZ();this.width = width; this.height = height; this.depth = depth;
+        this.koerper = new GLQuader(this.x, this.y, this.z,width , height, depth);
         this.kamera = new GLKamera(1200,1200);
+        this.kameraOffSet = this.height*6;
+        this.minKameraRange = this.width*this.depth/25;
+        this.maxKameraRange = this.width*this.depth/5;
         this.startMoving();
     }
     
@@ -41,7 +49,7 @@ public class Player
     }
     
     public void resetSpeed(){
-    	this.speed = 0.2;
+    	this.speed = 0.5;
     }
      
     public void setGravity(double gravity){
@@ -53,7 +61,7 @@ public class Player
     }
     
     public void resetGravity(){
-    	this.gravity = 0.001;
+    	this.gravity = 0.01;
     }
     
     public void setJumpStrength(double strength){
@@ -65,7 +73,33 @@ public class Player
     }
     
     public void resetJumpStrength(){
-    	this.jumpStrength = 0.5;
+    	this.jumpStrength = 2;
+    }
+    
+    public void setGameSpeed(int speed){
+    	this.gameSpeed = speed;
+    }
+    
+    public int getGameSpeed(){
+    	return this.gameSpeed;
+    }
+    
+    public void resetGameSpeed(){
+    	this.gameSpeed = 5;
+    }
+    
+    public int getQubicSize(){
+    	return this.width*this.height*this.depth;
+    }
+    
+    public void setSize(int width,int height,int depth){
+    	this.koerper.loesche();
+    	this.koerper = new GLQuader(this.getPosition(), width, height, depth);
+    	this.kameraOffSet = this.height*6+1;
+    	this.minKameraRange = this.width*this.depth/30;
+    	this.minKameraRange += 100; this.maxKameraRange += 10;
+        this.maxKameraRange = this.width*this.depth/10;
+    	this.width = width; this.height = height; this.depth = depth;
     }
     
     //bewegen des Objektes
@@ -92,9 +126,17 @@ public class Player
     }
     
     //gibt die HitPoints des Objektes
-    public GLVektor[] getHitPoints(){
-    	int s = this.size/2;
-    	GLVektor[] hitPoints = {new GLVektor(x,y,z),new GLVektor(x-s,y-s,z-s),new GLVektor(x-s,y-s,z+s),new GLVektor(x+s,y-s,z-s),new GLVektor(x+s,y-s,z+s)/*--*/,new GLVektor(x-s,y+s,z-s),new GLVektor(x-s,y+s,z+s),new GLVektor(x+s,y+s,z-s),new GLVektor(x+s,y+s,z+s)};
+    public List<GLVektor> getHitPoints(){
+    	List<GLVektor> hitPoints = new ArrayList<>();
+    	hitPoints.add(new GLVektor(this.x-this.width/2,this.y-this.height/2,this.z-this.depth/2));
+    	hitPoints.add(new GLVektor(this.x-this.width/2,this.y-this.height/2,this.z+this.depth/2));
+    	hitPoints.add(new GLVektor(this.x+this.width/2,this.y-this.height/2,this.z-this.depth/2));
+    	hitPoints.add(new GLVektor(this.x+this.width/2,this.y-this.height/2,this.z+this.depth/2));
+    	hitPoints.add(new GLVektor(this.x-this.width/2,this.y+this.height/2,this.z-this.depth/2));
+    	hitPoints.add(new GLVektor(this.x-this.width/2,this.y+this.height/2,this.z+this.depth/2));
+    	hitPoints.add(new GLVektor(this.x+this.width/2,this.y+this.height/2,this.z-this.depth/2));
+    	hitPoints.add(new GLVektor(this.x+this.width/2,this.y+this.height/2,this.z+this.depth/2));
+    	
     	return hitPoints;
     }
     
@@ -126,21 +168,20 @@ public class Player
     	if(kameraPos.gibZ()<this.z-this.maxKameraRange){
     		kameraPos.addiere(new GLVektor(0,0,this.speed));
     	}
-    	System.out.println(viewDirection);
     	if(this.viewDirection==1&&this.kamera.gibZ()-this.minKameraRange<this.z&&this.kamera.gibX()+minKameraRange>this.x&&this.kamera.gibX()-minKameraRange<this.x){
-    		kameraPos.addiere(new GLVektor(0,0,vektor.gibZ()+1));
+    		kameraPos.addiere(new GLVektor(0,0,vektor.gibZ()+1*kameraResetSpeed));
 		}else
 		if(this.viewDirection==3&&this.kamera.gibZ()+this.minKameraRange>this.z&&this.kamera.gibX()+minKameraRange>this.x&&this.kamera.gibX()-minKameraRange<this.x){
-    		kameraPos.addiere(new GLVektor(0,0,vektor.gibZ()-1));
+    		kameraPos.addiere(new GLVektor(0,0,vektor.gibZ()-1*kameraResetSpeed));
 		}else
 		if(this.viewDirection==0&&this.kamera.gibX()-this.minKameraRange<this.x&&this.kamera.gibZ()+minKameraRange>this.z&&this.kamera.gibZ()-minKameraRange<this.z){
-    		kameraPos.addiere(new GLVektor(vektor.gibZ()+1,0,0));
+    		kameraPos.addiere(new GLVektor(vektor.gibZ()+1*kameraResetSpeed,0,0));
 		}else
 		if(this.viewDirection==2&&this.kamera.gibX()+this.minKameraRange>this.x&&this.kamera.gibZ()+minKameraRange>this.z&&this.kamera.gibZ()-minKameraRange<this.z){
-    		kameraPos.addiere(new GLVektor(vektor.gibZ()-1,0,0));
+    		kameraPos.addiere(new GLVektor(vektor.gibZ()-1*kameraResetSpeed,0,0));
 		}
     	
-    	kameraPos.y=this.y+300;
+    	kameraPos.y=this.y+this.kameraOffSet;
     	this.kamera.setzePosition(kameraPos);
     }
     
@@ -191,7 +232,8 @@ public class Player
             public void run(){
                 GLTastatur tastatur = new GLTastatur();
                 boolean spacePressed = false;
-                while(!tastatur.esc()){
+                
+                while(true){
                 	setMoveDirektion();
                     if(tastatur.istGedrueckt('a')){
                     	GLVektor move = new GLVektor(0,0,0);
@@ -277,6 +319,28 @@ public class Player
 						}
                     	move(move);
                     }
+                    
+                    if(tastatur.istGedrueckt('q')){
+                    	GLVektor vektor = getKameraPosition();
+                    	vektor.rotiere(1, getPosition());
+                    	kamera.setzePosition(vektor.gibX(),getKameraPosition().gibY(),vektor.gibZ());
+                    	
+                    }
+                    
+                    if(tastatur.istGedrueckt('e')){
+                    	GLVektor vektor = getKameraPosition();
+                    	vektor.rotiere(-1, getPosition());
+                    	kamera.setzePosition(vektor.gibX(),getKameraPosition().gibY(),vektor.gibZ());
+                    }
+                    
+                    if(tastatur.istGedrueckt('o')){
+                    	setSize(width+1, height+1, depth+1);
+                    }
+                    
+                    if(tastatur.istGedrueckt('l')){
+                    	setSize(width-1, height-1, depth-1);
+                    }
+                    
                     if(tastatur.istGedrueckt('i'))System.out.println("Location: "+(int)x+":"+(int)y+":"+(int)z);
                     if(tastatur.istGedrueckt(' ')&&spacePressed == false){
                         move(new GLVektor(0,1,0));
@@ -294,11 +358,11 @@ public class Player
                     }
                     
                     if(!tastatur.istGedrueckt(' ')&&!tastatur.istGedrueckt('a')&&!tastatur.istGedrueckt('s')&&!tastatur.istGedrueckt('w')&&!tastatur.istGedrueckt('d')){
-                    	kameraResetSpeed = 0.05;
+                    	kameraResetSpeed = 0.05*(width*depth/1000);
                     }else{
-                    	kameraResetSpeed = 0.02;
+                    	kameraResetSpeed = 0.02*(width*depth/1000);
                     }
-                     switch (viewDirection) {
+                    switch (viewDirection) {
 					case 0:
 						if(kamera.gibZ()>z+2){
 							kamera.verschiebe(0, 0, -kameraResetSpeed);
@@ -336,11 +400,8 @@ public class Player
 					}
                    
                     
-                    try{Thread.sleep(1);}catch(InterruptedException exception){}
+                    try{Thread.sleep(5);}catch(InterruptedException exception){}
                 }
-                while (tastatur.esc()) {
-                	 try{Thread.sleep(1);}catch(InterruptedException exception){}
-				}
             }
         };
         thread.start();

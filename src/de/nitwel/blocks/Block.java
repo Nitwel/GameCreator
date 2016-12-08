@@ -1,5 +1,7 @@
 package de.nitwel.blocks;
 
+import java.util.UUID;
+
 import GLOOP.GLQuader;
 import GLOOP.GLVektor;
 
@@ -9,18 +11,25 @@ public class Block {
     GLQuader koerper;
     double x,y,z;
     int height, width, depth;
+    private UUID uuid;
     
     //erstellen des Objektes
     public Block(double x, double y, double z, int width,int height,int depth) {
         this.x = x; this.y = y; this.z = z;
         this.height = height; this.width = width; this.depth = depth;
         this.koerper = new GLQuader(this.x, this.y, this.z,width , height, depth);
+        this.uuid = UUID.randomUUID();
     }
     public Block(double x, double y, double z, int width,int height,int depth,String image) {
         this.x = x; this.y = y; this.z = z;
         this.height = height; this.width = width; this.depth = depth;
         this.koerper = new GLQuader(this.x, this.y, this.z,width , height, depth);
         this.koerper.setzeTextur(image);
+        this.uuid = UUID.randomUUID();
+    }
+    
+    public UUID getUUID(){
+    	return this.uuid;
     }
     
     //bewegen einer wand

@@ -1,6 +1,7 @@
 package de.nitwel.blocks;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import GLOOP.GLVektor;
 
@@ -46,6 +47,17 @@ public class BlockManager {
     	}
         return hittenBlocks;
     }
+    
+    public List<Object> getBlockFromLocation(GLVektor vektor){
+    	ArrayList<Object> hittenBlocks = new ArrayList<>();
+    	for(Object object :blocks){
+			if(object instanceof Block){
+				if(((Block) object).hitsBlock(vektor))hittenBlocks.add(object);
+			}
+    	}
+        return hittenBlocks;
+    }
+    
     public boolean hitsBlock(GLVektor vektor){
     	for(Object object:blocks){
     		if(object instanceof Block){
