@@ -7,6 +7,7 @@ import GLOOP.GLKamera;
 import GLOOP.GLQuader;
 import GLOOP.GLTastatur;
 import GLOOP.GLVektor;
+import de.nitwel.blocks.Teleporter;
 
 public class Player
 {
@@ -28,10 +29,11 @@ public class Player
     private int gameSpeed = 5;
     
     //erstellen eines Objektes
-    public Player(GLVektor vektor,int width,int height,int depth){
-        this.x = vektor.gibX(); this.y = vektor.gibY(); this.z = vektor.gibZ();this.width = width; this.height = height; this.depth = depth;
+    public Player(double x,double y,double z,int width,int height,int depth){
+        this.x = x; this.y = y; this.z = z;this.width = width; this.height = height; this.depth = depth;
         this.koerper = new GLQuader(this.x, this.y, this.z,width , height, depth);
         this.kamera = new GLKamera(1200,1200);
+        this.kamera.setzePosition(this.x,this.y,this.z-200);
         this.kameraOffSet = this.height*6;
         this.minKameraRange = this.width*this.depth/25;
         this.maxKameraRange = this.width*this.depth/5;
@@ -107,8 +109,15 @@ public class Player
     	if(this.hitsWallType(vektor,"BLOCK")){
     		return;
     	}else
-		if(this.hitsWallType(vektor,"LAVA")){
-			this.setPosition(new GLVektor(0,100,-100));
+		if(this.hitsWallType(vektor,"TELEPORTER")){
+			for(GLVektor glVektor: this.getHitPoints()){
+    			glVektor.addiere(vektor);
+    			if(Game.blockManager.getBlockFromLocation(glVektor)!=null&&Game.blockManager.getBlockFromLocation(glVektor) instanceof Teleporter){
+    				Teleporter teleporter = (Teleporter) Game.blockManager.getBlockFromLocation(glVektor);
+    				this.setPosition(teleporter.getTeleportLocation());
+    			}
+
+    		}
     		return;
     	}else
     	if(this.hitsWallType(vektor,"BOX")){
