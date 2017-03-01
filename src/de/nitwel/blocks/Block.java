@@ -12,20 +12,15 @@ public class Block {
     double x,y,z;
     int height, width, depth;
     private UUID uuid;
+    private String image;
     
-    //erstellen des Objektes
-    public Block(double x, double y, double z, int width,int height,int depth) {
-        this.x = x; this.y = y; this.z = z;
-        this.height = height; this.width = width; this.depth = depth;
-        this.koerper = new GLQuader(this.x, this.y, this.z,width , height, depth);
-        this.uuid = UUID.randomUUID();
-    }
     public Block(double x, double y, double z, int width,int height,int depth,String image) {
         this.x = x; this.y = y; this.z = z;
         this.height = height; this.width = width; this.depth = depth;
         this.koerper = new GLQuader(this.x, this.y, this.z,width , height, depth);
         this.koerper.setzeTextur(image);
         this.uuid = UUID.randomUUID();
+        this.image = image;
     }
     
     public UUID getUUID(){
@@ -38,11 +33,12 @@ public class Block {
 		this.koerper.verschiebe(vektor);
 		return true;
     }
+    
     public GLVektor getPosition() {
         return new GLVektor(this.x, this.y, this.z);
     }
 
-    public boolean hitsBlock(GLVektor vektor) {
+    public boolean hitsThisBlock(GLVektor vektor) {
         if (vektor.gibX() >= this.x - (this.width / 2) && vektor.gibX() <= this.x + (this.width / 2) && vektor.gibY() >= this.y - (this.height / 2) && vektor.gibY() <= this.y + (this.height / 2) && vektor.gibZ() >= this.z -(this.depth / 2) && vektor.gibZ() <= this.z + (this.depth / 2)) {
             
         	return true;
@@ -65,8 +61,13 @@ public class Block {
     public String getBlockType(){
     	return "BLOCK";
     }
-    public void remove(){
+    public void unload(){
     	this.koerper.loesche();
+    }
+    
+    public void load(){
+      this.koerper = new GLQuader(this.x, this.y, this.z,width , height, depth);
+      this.koerper.setzeTextur(this.image);
     }
     
 }

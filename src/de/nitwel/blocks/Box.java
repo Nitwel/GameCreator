@@ -3,66 +3,95 @@ package de.nitwel.blocks;
 import GLOOP.GLVektor;
 import de.nitwel.game.Game;
 
-public class Box extends Block{
-	
-	private double gravity = 0.001;
-	private double gravitation;
-	private Thread thread;
+public class Box extends Block {
 
-	public Box(double x, double y, double z, int height,int width,int depth) {
-		super( x, y, z, height, width, depth);
-		
-		thread = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				while(true){
-					if(inAir(gravitation)){
-                    move(new GLVektor(0.0,gravitation,0.0));
-                    gravitation -= gravity;
-	                }else{
-	                    gravitation = 0;
-	                }
-					try{Thread.sleep(1);}catch(InterruptedException exception){}
-				}
-			}
-		});
-		thread.start();
-	}
-	
-	public boolean inAir(double gravitation){
-        if(this.y > 0&&!(hitsWallType(new GLVektor(0, gravitation, 0),"BLOCK"))&&!(hitsWallType(new GLVektor(0, gravitation, 0),"BOX")))return true;
-        return false;
+  private double gravity = 0.1;
+  private double gravitation;
+  private int gameSpeed = 60;
+  private Thread thread;
+
+  public Box(double x, double y, double z, int height, int width, int depth, String image) {
+    super(x, y, z, height, width, depth, image);
+
+    thread = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+        while (true) {
+
+          if (!hitsBlock(new GLVektor(0, -gravitation - 1, 0))) {
+            gravitation += gravity;
+            move(new GLVektor(0, -gravitation, 0));
+          } else {
+            gravitation = 0;
+          }
+
+          try {
+            Thread.sleep(1000 / gameSpeed);
+          } catch (InterruptedException exception) {
+          }
+        }
+      }
+    });
+    thread.start();
+  }
+
+
+  boolean hitsBlock(GLVektor vektor) {
+
+    for (GLVektor hitVecs : this.getHitPoints()) {
+      hitVecs.addiere(vektor);
+
+      if (Game.blockManager.hitsBlock(hitVecs, this.getUUID()))
+        return true;
     }
-	
-	public boolean move(GLVektor vektor){
-    	if(this.hitsWallType(vektor,"BLOCK")){
-    		return false;
-    	}
-    	this.x += vektor.gibX(); this.y += vektor.gibY(); this.z += vektor.gibZ();
-		this.koerper.verschiebe(vektor);
-		return true;
+
+    return false;
+  }
+
+  private void gravity() {
+
+
+
+  }
+
+  public boolean move(GLVektor vektor) {
+    if (this.hitsWallType(vektor, "BLOCK")) {
+      return false;
     }
-	private boolean hitsWallType(GLVektor vektor,String blockType){
-    	for(GLVektor glVektor: this.getHitPoints()){
-    		glVektor.addiere(vektor);
-    		if(Game.blockManager.getBlockTypeFromLocation(glVektor).contains(blockType)){
-    			for(Object block: Game.blockManager.getBlockFromLocation(glVektor)){
-    				if(block instanceof Block&&!((Block) block).getUUID().equals(this.getUUID())){
-    					return true;
-    				}
-    			}
-    		}
-    	}
-    	return false;
+    this.x += vektor.gibX();
+    this.y += vektor.gibY();
+    this.z += vektor.gibZ();
+    this.koerper.verschiebe(vektor);
+    return true;
+  }
+
+  private boolean hitsWallType(GLVektor vektor, String blockType) {
+
+    for (GLVektor glVektor : this.getHitPoints()) {
+
+      glVektor.addiere(vektor);
+
+      if (Game.blockManager.getBlockTypes(glVektor).contains(blockType)) {
+
+        for (Object block : Game.blockManager.getBlocks(glVektor)) {
+          if (block instanceof Block && !((Block) block).getUUID().equals(this.getUUID())) {
+            return true;
+          }
+        }
+      }
     }
-	@Override
-	public String getBlockType() {
-		return "BOX";
-	}
-	@Override
-	public void remove() {
-		thread.interrupt();
-		super.remove();
-	}
+    return false;
+  }
+
+  @Override
+  public String getBlockType() {
+    return "BOX";
+  }
+
+  @Override
+  public void unload() {
+    thread.interrupt();
+    super.unload();
+  }
 }
