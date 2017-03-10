@@ -1,6 +1,7 @@
 package de.nitwel.blocks;
 
 import GLOOP.GLVektor;
+import de.nitwel.game.Player;
 
 public class Teleporter extends Block{
 	
@@ -10,13 +11,22 @@ public class Teleporter extends Block{
 		super( x, y, z, width, height, depth,textur);
 		this.spawnX = spawnX;this.spawnY = spawnY;this.spawnZ = spawnZ;
 	}
-	@Override
-	public String getBlockType() {
-		return "TELEPORTER";
-	}
+	
+	public Teleporter(GLVektor position, GLVektor size, String image, GLVektor spawn) {
+      super(position,size,image);
+      this.spawnX = spawn.gibX();
+      this.spawnY = spawn.gibY();
+      this.spawnZ = spawn.gibZ();
+  }
 	
 	public GLVektor getTeleportLocation(){
 		return new GLVektor(spawnX,spawnY,spawnZ);
+	}
+	
+	@Override
+	public boolean onPlayerHitBlock(Player player, GLVektor vektor) {
+	player.setPosition(new GLVektor(spawnX,spawnY,spawnZ));
+	return true;
 	}
 
 }

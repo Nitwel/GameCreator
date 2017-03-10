@@ -4,7 +4,10 @@ import GLOOP.GLHimmel;
 import GLOOP.GLLicht;
 import de.nitwel.blocks.Block;
 import de.nitwel.blocks.BlockManager;
+import de.nitwel.blocks.Box;
+import de.nitwel.blocks.JumpPad;
 import de.nitwel.blocks.Map;
+import de.nitwel.blocks.Teleporter;
 
 public class Game{
 	
@@ -19,20 +22,22 @@ public class Game{
     }
     
     public static void main(String[] args){
-	    Game game = new Game();
+	    new Game();
 	    
-	    new GLHimmel("sky.png");
+	    new GLHimmel("images/sky.png");
         new GLLicht(1000,3000,-3000);
-	    //Player player2 = new Player(0,200,200,50,50,50);
-	    //char[] player2inputs = {'4','6','8','2','0'};
-	    //player2.setKeyInputs(player2inputs);
+        
 	    Map map = new Map();
-	    map.addBlock(new Block(0,-25,0, 2000, 50, 2000 ,"box_white.png"));
+	    map.addBlock(new Block(0,-25,0, 2000, 50, 2000 ,"images/box_white.png"));
 	    
-	    map.addBlock(new Block(0, 100,300,100,100,100,"box_white.png"));
-	    map.addBlock(new Block(400,100,0, 200,200,200,"box_white.png"));
+	    Box block1 = new Box(400,400,0, 100, 50,100,"images/box_white.png");
+	    map.addBlock(block1);
 	    
-	    Player player = new Player(0,200,0,50,50,50,"lamp.png");
+	    map.addBlock(new JumpPad(-300, 50,- 300, 100, 50, 100 , 7, "images/wall.png"));
+	    
+	    map.addBlock(new Teleporter(300, 50, -300, 100, 100, 100, "images/wall.png", 300, 500, -300));
+	    
+	    new Player(0,300,0,50,50,50,"images/lamp.png");
 	    
 	    Game.blockManager.loadMap(map);
 	    

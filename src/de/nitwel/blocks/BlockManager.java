@@ -7,19 +7,15 @@ import GLOOP.GLVektor;
 
 public class BlockManager {
 
-  ArrayList<Object> blocks = new ArrayList<>();
+  ArrayList<Block> blocks = new ArrayList<>();
 
   public BlockManager() {
 
   }
 
-  public void addBlock(Object object) {
-    if (object instanceof Block) {
-      ((Block) object).load();
-      this.blocks.add(object);
-    } else {
-      throw new noBlockException(object.getClass().toString() + " must be a instance of Block");
-    }
+  public void addBlock(Block block) {
+    block.load();
+    blocks.add(block);
   }
 
   public void removeBlocks() {
@@ -34,60 +30,41 @@ public class BlockManager {
 
   public void loadMap(Map map) {
     this.removeBlocks();
-    for (Object object : map.getBlocks()) {
-      this.addBlock(object);
+    for (Block block : map.getBlocks()) {
+      this.addBlock(block);
     }
   }
-
-  public ArrayList<String> getBlockTypes(GLVektor vektor) {
-    ArrayList<String> hittenBlocks = new ArrayList<>();
-    for (Object object : blocks) {
-      if (object instanceof Block) {
-        if (((Block) object).hitsThisBlock(vektor))
-          hittenBlocks.add(((Block) object).getBlockType());
-      }
-    }
-    return hittenBlocks;
+  
+  public ArrayList<Block> getBlocks() {
+    return this.blocks;
   }
 
-  public ArrayList<Object> getBlocks(GLVektor vektor) {
-    ArrayList<Object> hittenBlocks = new ArrayList<>();
-    for (Object object : blocks) {
-      if (object instanceof Block) {
-        if (((Block) object).hitsThisBlock(vektor))
-          hittenBlocks.add(object);
-      }
+  public ArrayList<Block> getBlocks(GLVektor vektor) {
+    ArrayList<Block> hittenBlocks = new ArrayList<>();
+    for (Block block : blocks) {
+      if(block.hitsThisBlock(vektor))hittenBlocks.add(block);
     }
     return hittenBlocks;
   }
 
   public boolean hitsBlock(GLVektor vektor) {
-    for (Object object : blocks) {
-      if (object instanceof Block) {
-        if (((Block) object).hitsThisBlock(vektor))
-          return true;
-      }
+    for (Block block : blocks) {
+      if(block.hitsThisBlock(vektor))return true;
     }
     return false;
   }
   
   public boolean hitsBlock(GLVektor vektor, UUID id) {
-    for (Object object : blocks) {
-      if (object instanceof Block && ((Block) object).getUUID() != id) {
-        if (((Block) object).hitsThisBlock(vektor))
-          return true;
-      }
+    for (Block block : blocks) {
+      if(block.getUUID() == id && block.hitsThisBlock(vektor))return true;
     }
     return false;
   }
-
-  public Box getBlock(GLVektor vektor) {
-    for (Object block : blocks) {
-      if (block instanceof Box) {
-        if (((Box) block).hitsThisBlock(vektor))
-          return (Box) block;
-      }
+  
+  public boolean hitsOtherBlock(GLVektor vektor, Block executedBlock) {
+    for (Block block : blocks) {
+      if(block != executedBlock && block.hitsThisBlock(vektor))return true;
     }
-    return null;
+    return false;
   }
 }
