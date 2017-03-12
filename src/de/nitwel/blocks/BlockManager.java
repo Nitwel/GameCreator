@@ -1,39 +1,22 @@
 package de.nitwel.blocks;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import GLOOP.GLVektor;
 
 public class BlockManager {
 
-  ArrayList<Block> blocks = new ArrayList<>();
+  //----------------------------- Instanzen -----------------------------
+  
+  private ArrayList<Block> blocks = new ArrayList<>();
 
+  //----------------------------- Konstruktor -----------------------------
+  
   public BlockManager() {
-
+    
   }
-
-  public void addBlock(Block block) {
-    block.load();
-    blocks.add(block);
-  }
-
-  public void removeBlocks() {
-    for (Object object : blocks) {
-      if (object instanceof Block) {
-        ((Block) object).unload();
-        object = null;
-      }
-    }
-    blocks.clear();
-  }
-
-  public void loadMap(Map map) {
-    this.removeBlocks();
-    for (Block block : map.getBlocks()) {
-      this.addBlock(block);
-    }
-  }
+  
+  //----------------------------- get Methoden -----------------------------
   
   public ArrayList<Block> getBlocks() {
     return this.blocks;
@@ -54,9 +37,9 @@ public class BlockManager {
     return false;
   }
   
-  public boolean hitsBlock(GLVektor vektor, UUID id) {
+  public boolean hitsBlock(GLVektor vektor, Block searchedBlock) {
     for (Block block : blocks) {
-      if(block.getUUID() == id && block.hitsThisBlock(vektor))return true;
+      if(block == searchedBlock && block.hitsThisBlock(vektor))return true;
     }
     return false;
   }
@@ -67,4 +50,37 @@ public class BlockManager {
     }
     return false;
   }
+
+  //----------------------------- set Methoden -----------------------------
+  
+  public void addBlock(Block block) {
+    block.load();
+    blocks.add(block);
+  }
+
+  public void removeBlock(Block block){
+    if(this.blocks.contains(block)){
+      block.unload();
+      blocks.remove(block);
+    }
+  }
+  
+  public void removeBlocks() {
+    for (Object object : blocks) {
+      if (object instanceof Block) {
+        ((Block) object).unload();
+        object = null;
+      }
+    }
+    blocks.clear();
+  }
+
+  public void loadMap(Map map) {
+    this.removeBlocks();
+    for (Block block : map.getBlocks()) {
+      this.addBlock(block);
+    }
+  }
+  
+
 }

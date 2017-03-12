@@ -1,7 +1,6 @@
 package de.nitwel.game;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import GLOOP.GLKamera;
 import GLOOP.GLLicht;
@@ -11,15 +10,15 @@ import GLOOP.GLVektor;
 import de.nitwel.blocks.Block;
 
 public class Player {
-  
-  //----------------------------- Instanzen -----------------------------
+
+  // ----------------------------- Instanzen -----------------------------
 
   double x, y, z, xSize, ySize, zSize;
   String image;
   int viewDirection;
-  double gravitation = 0.1;
-  double speed = 1;
-  int jumpStrength = 5;
+  double gravitation = 0.2;
+  double speed = 3;
+  int jumpStrength = 8;
   int kameraRadiusMax = 300;
   int kameraRadiusMin = 50;
   int kameraHight = 200;
@@ -29,10 +28,10 @@ public class Player {
   GLKamera kamera;
   Thread living;
   char[] keyInputs = {'a', 'd', 'w', 's', ' ', 'q', 'e'};
-  int gameSpeed = 120;
+  int gameSpeed = Game.gameSpeed;
   boolean enterPressed = false;
-  
-  //----------------------------- Konstruktor -----------------------------
+
+  // ----------------------------- Konstruktor -----------------------------
 
   public Player(double x, double y, double z, double xSize, double ySize, double zSize,
       String image) {
@@ -74,7 +73,7 @@ public class Player {
     this.create();
 
   }
-  
+
   public Player(GLVektor position, double size, String image) {
 
     this.x = position.gibX();
@@ -95,37 +94,26 @@ public class Player {
 
   }
 
-  //----------------------------- get Methoden -----------------------------
-  
+  // ----------------------------- get Methoden -----------------------------
+
   public GLVektor getPosition() {
     return new GLVektor(this.x, this.y, this.z);
   }
-  
+
   public GLVektor getSize() {
     return new GLVektor(this.xSize, this.ySize, this.zSize);
   }
-  
+
   public int getGameSpeed() {
     return this.gameSpeed;
   }
-  
+
   public boolean hitsBlock(GLVektor vektor) {
 
     for (GLVektor hitVecs : this.getHitBox()) {
       hitVecs.addiere(vektor);
 
       if (Game.blockManager.hitsBlock(hitVecs))
-        return true;
-    }
-
-    return false;
-  }
-  
-  public boolean hitsBlock(UUID uuid) {
-
-    for (GLVektor hitVecs : this.getHitBox()) {
-
-      if (Game.blockManager.hitsBlock(hitVecs, uuid));
         return true;
     }
 
@@ -157,21 +145,21 @@ public class Player {
   public int getViewDirection() {
     return viewDirection;
   }
-  
-  public double getSpeed(){
+
+  public double getSpeed() {
     return this.speed;
   }
-  
+
   public double getGravitation() {
     return gravitation;
   }
-  
+
   public int getJumpStrength() {
     return jumpStrength;
   }
-  
-  //----------------------------- set Methoden -----------------------------
-  
+
+  // ----------------------------- set Methoden -----------------------------
+
   public void setSize(double xSize, double ySize, double zSize) {
     this.xSize = xSize;
     this.ySize = ySize;
@@ -195,27 +183,41 @@ public class Player {
     return false;
   }
 
-  public void move(GLVektor vektor) {
-    
+  public boolean move(GLVektor vektor) {
+
     boolean hitBlock = false;
-    
+
     for (GLVektor hitVecs : this.getHitBox()) {
-      
+
       hitVecs.addiere(vektor);
-      for(Block block: Game.blockManager.getBlocks(hitVecs)){
-        hitBlock = hitBlock? true : block.onPlayerHitBlock(this, vektor);
+      for (Block block : Game.blockManager.getBlocks(hitVecs)) {
+        hitBlock = hitBlock ? true : block.onPlayerHitBlock(this, vektor);
       }
-      
+
     }
-    
-    if(hitBlock)return;
-    
+
+    if (hitBlock)
+      return false;
+
     this.x += vektor.gibX();
     this.y += vektor.gibY();
     this.z += vektor.gibZ();
 
     this.quader.verschiebe(vektor);
     this.kamera.setzeBlickpunkt(this.x, this.y, this.z);
+    this.updateKamera(vektor);
+    this.updateViewDirection();
+    
+    return true;
+
+  }
+  
+  public void moveIngnoringHitBox(GLVektor vektor) {
+
+    this.x += vektor.gibX();
+    this.y += vektor.gibY();
+    this.z += vektor.gibZ();
+
     this.updateKamera(vektor);
     this.updateViewDirection();
 
@@ -229,19 +231,24 @@ public class Player {
     }
 
   }
-  
+
   public void setSpeed(double speed) {
     this.speed = speed;
   }
-  
+
   public void setGravitation(double gravitation) {
     this.gravitation = gravitation;
   }
-  
+
+  public void invertPlayerGravity(double prozent) {
+    this.playerGravity =
+        this.playerGravity >= 0 ? -this.playerGravity * prozent : this.playerGravity * prozent;
+  }
+
   public void setJumpStrength(int jumpStrength) {
     this.jumpStrength = jumpStrength;
   }
-  
+
   public void setPosition(GLVektor location) {
 
     this.x = location.gibX();
@@ -252,8 +259,8 @@ public class Player {
         location.gibZ());
 
   }
-  
-  //----------------------------- private Methoden -----------------------------
+
+  // ----------------------------- private Methoden -----------------------------
 
   private void gravity() {
 
@@ -447,6 +454,9 @@ public class Player {
           } else if (!tastatur.enter()) {
             enterPressed = false;
           }
+          
+          quader.setzePosition(x, y, z);
+          kamera.setzeBlickpunkt(x, y, z);
 
           try {
             Thread.sleep(1000 / gameSpeed);
@@ -476,8 +486,6 @@ public class Player {
     this.kamera.setzePosition(this.kamera.gibX(), this.y + this.kameraHight,
         this.kamera.gibPosition().gibZ());
 
-    // System.out.println("KameraX: " + vektor.gibX() + " KameraY: " + vektor.gibY() + " KameraZ: "
-    // + vektor.gibZ());
   }
 
   private void updateViewDirection() {

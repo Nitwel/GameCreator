@@ -23,6 +23,12 @@ public class Teleporter extends Block{
 		return new GLVektor(spawnX,spawnY,spawnZ);
 	}
 	
+	public void setTeleportLocation(GLVektor vektor){
+	  this.spawnX = vektor.gibX();
+      this.spawnY = vektor.gibY();
+      this.spawnZ = vektor.gibZ();
+	}
+	
 	@Override
 	public boolean onPlayerHitBlock(Player player, GLVektor vektor) {
 	player.setPosition(new GLVektor(spawnX,spawnY,spawnZ));

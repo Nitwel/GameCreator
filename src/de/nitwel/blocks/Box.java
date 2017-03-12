@@ -1,5 +1,9 @@
 package de.nitwel.blocks;
 
+
+
+
+
 import GLOOP.GLVektor;
 import de.nitwel.game.Game;
 import de.nitwel.game.Player;
@@ -8,7 +12,7 @@ public class Box extends Block {
 
   private double gravitation = 0.1;
   private double objectGravity;
-  private int gameSpeed = 120;
+  private int gameSpeed = Game.gameSpeed;
   private Thread thread;
 
   public Box(double x, double y, double z, int xSize, int ySize, int zSize, String image) {

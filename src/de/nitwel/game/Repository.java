@@ -18,7 +18,7 @@ public class Repository {
 	  double zDis = pos2.gibZ() - pos1.gibZ();
 	  
 	  double distance = Math.sqrt(Math.pow(xDis, 2)+Math.pow(zDis, 2));
-	  distance = zDis>0?distance:-distance;
+	  distance = zDis>=0?distance:-distance;
 	  
 	  double calcDegree = Math.toDegrees(Math.atan(xDis/zDis));
 	  
